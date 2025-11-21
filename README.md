@@ -1,68 +1,61 @@
-# Text Chunker Script
+# Data Processing Pipeline for ACE the Data Science Interview
 
-This Python script reads large text documents from a JSON file, splits the text into smaller chunks suitable for embedding and vector search using the `tiktoken` library, preserves metadata, and outputs a new JSON file with the chunked data.
+This project processes the "Ace the Data Science Interview" book content into a structured format suitable for further analysis, embedding, or search applications.
 
-## Requirements
+## Data Processing Pipeline
 
-- Python 3.7+
-- `tiktoken` library
+### Input Format (`ace_the_data.json`)
+- **Structure**: Array of objects
+- **Fields per object**:
+  - `page_number`: Integer indicating the page number
+  - `content`: String containing the full text of the page
 
-## Installation
+### Output Format (`ace_data_chunks.json`)
+- **Structure**: Array of chunked content objects
+- **Fields per chunk**:
+  - `id`: Unique identifier for the page (e.g., "ace_data_page_1")
+  - `date`: Processing date in YYYY-MM-DD format
+  - `page_number`: Original page number from the input
+  - `text`: Chunk of text (around 1000 tokens)
+  - `chunk_index`: Index of the chunk within its page (0-based)
+  - `total_chunks`: Total number of chunks for this page
 
-Install the required dependencies with:
+### Key Transformations
+1. **Chunking**: Long pages are split into smaller, manageable chunks of approximately 1000 tokens each
+2. **Metadata Enrichment**: Added processing date and chunking information
+3. **Empty Page Handling**: Empty pages are filtered out
+4. **Consistent Structure**: Each chunk follows the same structure for easier processing
 
-```bash
-pip install -r requirements.txt
+### Example Transformation
+
+**Input:**
+```json
+{
+  "page_number": 1,
+  "content": "AGE THE\nDATA SCIENCE\nINTERVIEW\n201 Real Interview Questions..."
+}
+```
+
+**Output:**
+```json
+{
+  "id": "ace_data_page_1",
+  "date": "2025-11-21",
+  "page_number": 1,
+  "text": "AGE THE\nDATA SCIENCE\nINTERVIEW\n201 Real Interview Questions...",
+  "chunk_index": 0,
+  "total_chunks": 1
+}
 ```
 
 ## Usage
 
-Run the script with the input JSON file and output JSON file paths:
+1. Install the required dependencies:
+   ```bash
+   pip install tiktoken
+   ```
 
-```bash
-python text_chunker.py input.json output.json
-```
-
-### Input JSON Format
-
-The input JSON file should be a list of objects, each containing at least a `text` field and any additional metadata fields. Example:
-
-```json
-[
-  {
-    "id": "doc1",
-    "date": "2025-11-21",
-    "sender": "user@example.com",
-    "text": "Long text content here..."
-  },
-  {
-    "id": "doc2",
-    "date": "2025-11-20",
-    "sender": "another@example.com",
-    "text": "Another long text content..."
-  }
-]
-```
-
-### Output JSON Format
-
-The output JSON file will contain the chunked text with preserved metadata and an added `chunk_index` field indicating the chunk number. Example:
-
-```json
-[
-  {
-    "id": "doc1",
-    "date": "2025-11-21",
-    "sender": "user@example.com",
-    "text": "Chunk 0 text...",
-    "chunk_index": 0
-  },
-  {
-    "id": "doc1",
-    "date": "2025-11-21",
-    "sender": "user@example.com",
-    "text": "Chunk 1 text...",
-    "chunk_index": 1
-  }
-]
-```
+2. Run the processing script:
+   ```bash
+   python process_ace_data.py --input text_chunker/ace_the_data.json --output ace_data_chunks.json
+   ```
